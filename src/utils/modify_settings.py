@@ -68,9 +68,8 @@ def validate_settings():
 
 def cache_settings():
     """Cache settings.py"""
-    settings_file = open('settings.py', 'r')
-    settings_cache = settings_file.read()
-    settings_file.close()
+    with open('settings.py', 'r') as settings_file:
+        settings_cache = settings_file.read()
     return settings_cache
 
 
@@ -94,15 +93,13 @@ def build_settings(actions=None, events=None, links=None):
     def wipe_settings():
         """Wipe settings.py"""
         logger.info('Resetting settings.py')
-        settings_file = open('settings.py', 'w')
-        settings_file.write('')
-        settings_file.close()
+        with open('settings.py', 'w') as settings_file:
+            settings_file.write('')
 
     def write_variables(name, value, heading=None):
         """Write variables to settings.py"""
-        settings_file = open('settings.py', 'a')
-        settings_file.write(f'# {heading}\n{name} = {value}\n\n')
-        settings_file.close()
+        with open('settings.py', 'a') as settings_file:
+            settings_file.write(f'# {heading}\n{name} = {value}\n\n')
 
     # first wipe settings.py
     wipe_settings()
@@ -125,9 +122,8 @@ def build_settings(actions=None, events=None, links=None):
     else:
         logger.error('\n\n✕✕✕ Settings not valid ✕✕✕\n')
         logger.error('Resetting settings.py')
-        settings_file = open('settings.py', 'w')
-        settings_file.write(settings_cache)
-        settings_file.close()
+        with open('settings.py', 'w') as settings_file:
+            settings_file.write(settings_cache)
 
 
 def add_action(action_name):

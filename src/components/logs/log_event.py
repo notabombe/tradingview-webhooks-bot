@@ -11,7 +11,7 @@ class LogEvent:
         self.event_data = event_data.replace(',', ' ') if event_data else None
 
     def __str__(self):
-        return "Event Type: " + self.event_type + " Event Time: " + self.event_time + " Event Data: " + self.event_data
+        return f"Event Type: {self.event_type} Event Time: {self.event_time} Event Data: {self.event_data}"
 
     def get_event_type(self):
         return self.event_type
@@ -32,7 +32,10 @@ class LogEvent:
         self.event_data = event_data
 
     def to_line(self):
-        return self.parent + "," + self.event_type + "," + self.event_time + "," + self.event_data + "\n"
+        return (
+            f"{self.parent},{self.event_type},{self.event_time},{self.event_data}"
+            + "\n"
+        )
 
     def as_json(self):
         return {

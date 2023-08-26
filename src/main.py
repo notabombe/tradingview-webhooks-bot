@@ -31,31 +31,28 @@ schema_list = {
 
 @app.route("/", methods=["GET"])
 def dashboard():
-    if request.method == 'GET':
-
+    if request.method != 'GET':
+        return
         # check if gui key file exists
-        try:
-            with open('.gui_key', 'r') as key_file:
-                gui_key = key_file.read().strip()
+    try:
+        with open('.gui_key', 'r') as key_file:
+            gui_key = key_file.read().strip()
                 # check that the gui key from file matches the gui key from request
-                if gui_key == request.args.get('guiKey', None):
-                    pass
-                else:
-                    return 'Access Denied', 401
+            if gui_key != request.args.get('guiKey', None):
+                return 'Access Denied', 401
 
-        # if gui key file does not exist, the tvwb.py did not start gui in closed mode
-        except FileNotFoundError:
-            logger.warning('GUI key file not found. Open GUI mode detected.')
+    except FileNotFoundError:
+        logger.warning('GUI key file not found. Open GUI mode detected.')
 
-        # serve the dashboard
-        action_list = am.get_all()
-        return render_template(
-            template_name_or_list='dashboard.html',
-            schema_list=schema_list,
-            action_list=action_list,
-            event_list=registered_events,
-            version=VERSION_NUMBER
-        )
+    # serve the dashboard
+    action_list = am.get_all()
+    return render_template(
+        template_name_or_list='dashboard.html',
+        schema_list=schema_list,
+        action_list=action_list,
+        event_list=registered_events,
+        version=VERSION_NUMBER
+    )
 
 
 @app.route("/webhook", methods=["POST"])
@@ -63,7 +60,7 @@ def webhook():
     if request.method == 'POST':
         data = request.get_json()
         if data is None:
-            logger.error(f'Error getting JSON data from request...')
+            logger.error('Error getting JSON data from request...')
             logger.error(f'Request data: {request.data}')
             logger.error(f'Request headers: {request.headers}')
             return 'Error getting JSON data from request', 400
@@ -94,22 +91,23 @@ def get_logs():
 
 @app.route("/event/active", methods=["POST"])
 def activate_event():
-    if request.method == 'POST':
-        # get query parameters
-        event_name = request.args.get('event', None)
+    if request.method != 'POST':
+        return
+    # get query parameters
+    event_name = request.args.get('event', None)
 
-        # if event name is not provided, or cannot be found, 404
-        if event_name is None:
-            return Response(f'Event name cannot be empty ({event_name})', status=404)
-        try:
-            event = em.get(event_name)
-        except ValueError:
-            return Response(f'Cannot find event with name: {event_name}', status=404)
+    # if event name is not provided, or cannot be found, 404
+    if event_name is None:
+        return Response(f'Event name cannot be empty ({event_name})', status=404)
+    try:
+        event = em.get(event_name)
+    except ValueError:
+        return Response(f'Cannot find event with name: {event_name}', status=404)
 
-        # set event to active or inactive, depending on current state
-        event.active = request.args.get('active', True) == 'true'
-        logger.info(f'Event {event.name} active set to: {event.active}, via POST request')
-        return {'active': event.active}
+    # set event to active or inactive, depending on current state
+    event.active = request.args.get('active', True) == 'true'
+    logger.info(f'Event {event.name} active set to: {event.active}, via POST request')
+    return {'active': event.active}
 
 
 if __name__ == '__main__':

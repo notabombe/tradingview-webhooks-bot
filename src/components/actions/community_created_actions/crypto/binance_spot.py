@@ -27,20 +27,17 @@ class BinanceSpot(Action):
             balance = self.exchange.fetch_balance()
             if side == 'buy':
                 base_balance = balance['free'][symbol[-4:]]
-            elif side == 'sell':
-                base_balance = balance['free'][symbol[:-4]]
-            
-            # Calculate the amount of asset to buy or sell
-            if side == 'buy':
                 amount = base_balance / price
             elif side == 'sell':
+                base_balance = balance['free'][symbol[:-4]]
+
                 amount = base_balance
 
             markets = self.exchange.load_markets()
             formatted_amount = self.exchange.amount_to_precision(symbol, amount)
             order = self.exchange.create_market_order(symbol, side, quoteOrderQty=formatted_amount)
             print(order)
-            # Print the order details
+                # Print the order details
         except ccxt.BaseError as e:
             # Handle the exception
             print("An error occurred while placing the order:", e)
